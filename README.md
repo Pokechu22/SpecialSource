@@ -20,3 +20,12 @@ By default this will output the results in the *Searge* mapping format, and omit
 * Complex remapping of jar files based on inputted mappings and transformers. This method must support *Searge, Compact Searge, MCP CSV, Maven Shade and Access Transformer* style mappings. This will be done by way of chaining, where the parsed output from each format will be the input for the next format. A logical use of this would be transforming obfuscated names to numeric names, then altering their access before finally outputting in a human readable format based on the *MCP CSV* data. It is also important that several exotic functions from SpecialSource be supported. These include using the classpath for inheritance lookup: `--live`, removing attributes from the generated class file: `--kill`, adding magic values to the constant pool: `--identifier`, and excluding specific packages from being remapped: `--exclude`. A complete remap invocation would look similar to the following:
 `remap input.jar output.jar client.srg fields.csv methods.csv com/google/guava=net/md_5/guava access.at --live --kill LocalVariableTable --kill SourceFile --identifier SpecialSource-Remapped --exclude net/md_5`
 The format of the mapping chain inputs is deduced based on the file extension or format specified.
+
+* Correct handling of the following complex inheritance situation:
+`class A { void foo(){} }`, `interface I { void foo(); }`, `class B extends A implements I {}`. If a class structured like this is remapped as `B.foo -> B.bar`, then a synthetic method should be added such that `class B extends A implements I { void bar(){ super.foo(); } }`. I believe this would be the correct way of handling the extremely stupid (and complex), "hidden inheritance" problem.
+
+* Test suite. A major hurdle when developing new feature, or fixing bugs in SpecialSource is lack of a test suite. When developing SpecialSource v2, tests for behavior such as the above "hidden inheritance" problem should be included and run on compilation of each build.
+
+Licensing
+---------
+It is intended that SpecialSource v2 be licensed under the *CC BY-NC-SA 4.0* license (http://creativecommons.org/licenses/by-nc-sa/4.0/). Put simply this license allows maximum flexibility as long as derivatives are properly attributed and that SpecialSource v2 is not used for commercial gain without written permission from the author. The author reserves the write to relicense previous contributions at any time.
